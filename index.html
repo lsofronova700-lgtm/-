@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Анкета «Точка роста»</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --text: #1d2433;
+    --muted: #5b6577;
+    --line: #dde2ec;
+    --accent: #1f6feb;
+    --accent-soft: #e6efff;
+    --robot: #0f8a6b;
+    --design: #b4418e;
+    --good: #12805c;
+    --mid: #b7791f;
+    --bad: #c53030;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11151c;
+      --card: #1a2029;
+      --text: #e6e9ef;
+      --muted: #9aa4b5;
+      --line: #2c3442;
+      --accent: #5b9bff;
+      --accent-soft: #1d2b44;
+      --robot: #3cc49d;
+      --design: #e27bc0;
+      --good: #4cc38a;
+      --mid: #e0a84a;
+      --bad: #f07171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151c; --card: #1a2029; --text: #e6e9ef; --muted: #9aa4b5; --line: #2c3442;
+    --accent: #5b9bff; --accent-soft: #1d2b44; --robot: #3cc49d; --design: #e27bc0;
+    --good: #4cc38a; --mid: #e0a84a; --bad: #f07171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  header h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  header p { margin: 0 0 20px; color: var(--muted); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 1.1rem; margin: 0 0 12px; }
+  .q { padding: 12px 0; border-top: 1px solid var(--line); }
+  .q:first-of-type { border-top: 0; padding-top: 0; }
+  .q > .label { display: block; font-weight: 500; margin-bottom: 8px; }
+  .scale { display: flex; flex-wrap: wrap; gap: 6px; }
+  .scale label, .choice label {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-width: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+    cursor: pointer; user-select: none;
+  }
+  .scale input, .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale input:checked + span, .choice input:checked + span { font-weight: 600; }
+  .scale label:has(input:checked), .choice label:has(input:checked) {
+    background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+  }
+  .scale label:has(input:focus-visible), .choice label:has(input:focus-visible) {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .hint { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+  .choice { display: flex; flex-wrap: wrap; gap: 8px; }
+  textarea, select, input[type="text"] {
+    width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--text); font: inherit;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-left: 6px; color: #fff; vertical-align: middle; }
+  .tag.robot { background: var(--robot); }
+  .tag.design { background: var(--design); }
+  .hidden { display: none; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  button {
+    font: inherit; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--accent);
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+  button.secondary { background: transparent; color: var(--accent); }
+  .err { color: var(--bad); font-size: .9rem; margin-top: 8px; }
+  .q.missing > .label { color: var(--bad); }
+  .result-big { font-size: 2.4rem; font-weight: 700; margin: 0; }
+  .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 8px 0 4px; }
+  .bar > i { display: block; height: 100%; background: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  td, th { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  @media print {
+    .actions, #themeBtn { display: none; }
+    body { background: #fff; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Анкета удовлетворённости качеством услуг</h1>
+    <p>Центр образования «Точка роста» · кружки «Робототехника» и «Графический дизайн». Анкета анонимная, заполнение займёт 5–7 минут.</p>
+  </header>
+
+  <form id="survey" novalidate>
+    <section class="card">
+      <h2>1. О вас</h2>
+      <div class="q" data-required="role">
+        <span class="label">Кто заполняет анкету?</span>
+        <div class="choice">
+          <label><input type="radio" name="role" value="Обучающийся"><span>Обучающийся</span></label>
+          <label><input type="radio" name="role" value="Родитель (законный представитель)"><span>Родитель (законный представитель)</span></label>
+        </div>
+      </div>
+      <div class="q" data-required="club">
+        <span class="label">Какой кружок вы (ваш ребёнок) посещаете?</span>
+        <div class="choice">
+          <label><input type="radio" name="club" value="robot"><span>Робототехника</span></label>
+          <label><input type="radio" name="club" value="design"><span>Графический дизайн</span></label>
+          <label><input type="radio" name="club" value="both"><span>Оба кружка</span></label>
+        </div>
+      </div>
+      <div class="q">
+        <label class="label" for="grade">Класс</label>
+        <select id="grade" name="grade">
+          <option value="">— не указывать —</option>
+          <option>1–4 класс</option><option>5–6 класс</option><option>7–8 класс</option><option>9–11 класс</option>
+        </select>
+      </div>
+      <div class="q">
+        <span class="label">Как долго посещаете кружок?</span>
+        <div class="choice">
+          <label><input type="radio" name="duration" value="Меньше полугода"><span>Меньше полугода</span></label>
+          <label><input type="radio" name="duration" value="Полгода – год"><span>Полгода – год</span></label>
+          <label><input type="radio" name="duration" value="Больше года"><span>Больше года</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Общая оценка занятий</h2>
+      <p class="hint">Оцените по шкале от 1 до 5: 1 — совсем не согласен, 5 — полностью согласен.</p>
+      <div id="common"></div>
+    </section>
+
+    <section class="card hidden" id="robotBlock">
+      <h2>3. Робототехника <span class="tag robot">кружок</span></h2>
+      <div id="robot"></div>
+    </section>
+
+    <section class="card hidden" id="designBlock">
+      <h2 id="designTitle">3. Графический дизайн <span class="tag design">кружок</span></h2>
+      <div id="design"></div>
+    </section>
+
+    <section class="card">
+      <h2>Итоговая оценка</h2>
+      <div class="q" data-required="overall">
+        <span class="label">Насколько в целом вы удовлетворены занятиями в кружке?</span>
+        <div class="scale" id="overallScale"></div>
+        <div class="hint">1 — совсем не удовлетворён, 5 — полностью удовлетворён</div>
+      </div>
+      <div class="q" data-required="recommend">
+        <span class="label">Насколько вероятно, что вы порекомендуете кружок друзьям или знакомым?</span>
+        <div class="scale" id="recommendScale"></div>
+        <div class="hint">0 — точно не порекомендую, 10 — обязательно порекомендую</div>
+      </div>
+      <div class="q">
+        <span class="label">Планируете продолжить занятия в следующем учебном году?</span>
+        <div class="choice">
+          <label><input type="radio" name="continue" value="Да"><span>Да</span></label>
+          <label><input type="radio" name="continue" value="Скорее да"><span>Скорее да</span></label>
+          <label><input type="radio" name="continue" value="Не знаю"><span>Не знаю</span></label>
+          <label><input type="radio" name="continue" value="Нет"><span>Нет</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Ваши пожелания</h2>
+      <div class="q">
+        <label class="label" for="liked">Что вам больше всего нравится на занятиях?</label>
+        <textarea id="liked" name="liked"></textarea>
+      </div>
+      <div class="q">
+        <label class="label" for="improve">Что, по-вашему, стоит улучшить?</label>
+        <textarea id="improve" name="improve"></textarea>
+      </div>
+      <div class="q">
+        <label class="label" for="topics">Какие темы или проекты вы хотели бы добавить?</label>
+        <textarea id="topics" name="topics"></textarea>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="submit">Получить результат</button>
+      <button type="button" class="secondary" id="resetBtn">Очистить</button>
+      <button type="button" class="secondary" id="themeBtn">Тема</button>
+    </div>
+    <div class="err hidden" id="err">Ответьте, пожалуйста, на все вопросы с оценками — незаполненные выделены красным.</div>
+  </form>
+
+  <section class="card hidden" id="result" aria-live="polite"></section>
+</div>
+
+<script>
+const COMMON = [
+  ["c1", "Мне интересно на занятиях"],
+  ["c2", "Педагог понятно объясняет материал"],
+  ["c3", "Педагог внимателен, помогает, если что-то не получается"],
+  ["c4", "На занятиях я узнаю новое и получаю полезные навыки"],
+  ["c5", "Оборудование и материалы в кабинете современные и исправные"],
+  ["c6", "Расписание занятий удобное"],
+  ["c7", "В кабинете комфортно и безопасно"],
+  ["c8", "В группе доброжелательная атмосфера"],
+  ["c9", "Есть возможность участвовать в конкурсах, выставках, проектах"],
+  ["c10", "Информация о занятиях и мероприятиях доступна (сайт, чат, объявления)"]
+];
+const ROBOT = [
+  ["r1", "Конструкторов и деталей хватает на всех"],
+  ["r2", "Мне понятно, как программировать роботов"],
+  ["r3", "Мы собираем собственные проекты, а не только по инструкции"],
+  ["r4", "Есть возможность участвовать в соревнованиях по робототехнике"]
+];
+const DESIGN = [
+  ["d1", "Компьютеры и графические программы работают без сбоев"],
+  ["d2", "Мне понятно, как пользоваться графическими редакторами"],
+  ["d3", "Задания развивают творчество и художественный вкус"],
+  ["d4", "Мои работы показывают на выставках, сайте или в портфолио"]
+];
+
+function scale(name, from, to) {
+  let h = "";
+  for (let i = from; i <= to; i++)
+    h += `<label><input type="radio" name="${name}" value="${i}"><span>${i}</span></label>`;
+  return h;
+}
+function render(id, list) {
+  document.getElementById(id).innerHTML = list.map(([n, t]) =>
+    `<div class="q" data-required="${n}"><span class="label">${t}</span><div class="scale">${scale(n, 1, 5)}</div></div>`
+  ).join("");
+}
+render("common", COMMON);
+render("robot", ROBOT);
+render("design", DESIGN);
+document.getElementById("overallScale").innerHTML = scale("overall", 1, 5);
+document.getElementById("recommendScale").innerHTML = scale("recommend", 0, 10);
+
+const form = document.getElementById("survey");
+const val = n => { const el = form.querySelector(`input[name="${n}"]:checked`); return el ? el.value : ""; };
+
+function updateBlocks() {
+  const club = val("club");
+  const r = club === "robot" || club === "both";
+  const d = club === "design" || club === "both";
+  document.getElementById("robotBlock").classList.toggle("hidden", !r);
+  document.getElementById("designBlock").classList.toggle("hidden", !d);
+  document.querySelector("#designTitle").firstChild.nodeValue = (r && d ? "4." : "3.") + " Графический дизайн ";
+}
+form.addEventListener("change", e => {
+  if (e.target.name === "club") updateBlocks();
+  const q = e.target.closest(".q"); if (q) q.classList.remove("missing");
+});
+
+function level(p) {
+  if (p >= 80) return ["высокий", "var(--good)"];
+  if (p >= 60) return ["средний", "var(--mid)"];
+  return ["низкий", "var(--bad)"];
+}
+const pct = (sum, n) => n ? Math.round((sum / n - 1) / 4 * 100) : 0;
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  let ok = true;
+  form.querySelectorAll(".q[data-required]").forEach(q => {
+    if (q.closest(".hidden")) return;
+    const miss = !val(q.dataset.required);
+    q.classList.toggle("missing", miss);
+    if (miss) ok = false;
+  });
+  document.getElementById("err").classList.toggle("hidden", ok);
+  if (!ok) { form.querySelector(".q.missing").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+
+  const club = val("club");
+  const groups = [["Общие вопросы", COMMON]];
+  if (club !== "design") groups.push(["Робототехника", ROBOT]);
+  if (club !== "robot") groups.push(["Графический дизайн", DESIGN]);
+
+  let all = 0, cnt = 0, rows = "", csv = [["Вопрос", "Оценка"]];
+  groups.forEach(([g, list]) => {
+    let s = 0;
+    list.forEach(([n, t]) => { const v = +val(n); s += v; csv.push([t, v]); });
+    all += s; cnt += list.length;
+    const p = pct(s, list.length);
+    rows += `<tr><td>${g}</td><td class="num">${(s / list.length).toFixed(1)} из 5</td><td class="num">${p}%</td></tr>`;
+  });
+  const index = pct(all, cnt);
+  const [lv, color] = level(index);
+  const rec = +val("recommend");
+  const recText = rec >= 9 ? "сторонник" : rec >= 7 ? "нейтрально настроенный" : "критик";
+
+  const weak = groups.flatMap(([, l]) => l).filter(([n]) => +val(n) <= 3).map(([, t]) => t);
+
+  ["role", "club", "duration", "continue", "overall", "recommend"].forEach(n => csv.push([n, val(n)]));
+  ["grade", "liked", "improve", "topics"].forEach(n => csv.push([n, form.elements[n].value]));
+
+  const box = document.getElementById("result");
+  box.innerHTML = `
+    <h2>Результат</h2>
+    <p class="hint">Индекс удовлетворённости</p>
+    <p class="result-big" style="color:${color}">${index}%</p>
+    <div class="bar"><i style="width:${index}%;background:${color}"></i></div>
+    <p>Уровень удовлетворённости: <b style="color:${color}">${lv}</b>. Общая оценка: <b>${val("overall")} из 5</b>.
+       Готовность рекомендовать: <b>${rec} из 10</b> (${recText}).</p>
+    <table><thead><tr><th>Раздел</th><th class="num">Средний балл</th><th class="num">Индекс</th></tr></thead><tbody>${rows}</tbody></table>
+    ${weak.length ? `<p><b>Стоит обратить внимание</b> (оценка 3 и ниже):</p><ul>${weak.map(w => `<li>${w}</li>`).join("")}</ul>` : `<p>Все пункты оценены на 4–5 баллов. Спасибо!</p>`}
+    <p class="hint">Шкала: 80–100% — высокий, 60–79% — средний, ниже 60% — низкий уровень.</p>
+    <div class="actions"><button type="button" id="csvBtn">Скачать ответы (CSV)</button>
+    <button type="button" class="secondary" onclick="window.print()">Печать</button></div>`;
+  box.classList.remove("hidden");
+  box.scrollIntoView({ behavior: "smooth" });
+
+  document.getElementById("csvBtn").onclick = () => {
+    const text = "﻿" + csv.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    a.download = "anketa-tochka-rosta.csv";
+    a.click();
+  };
+});
+
+document.getElementById("resetBtn").onclick = () => {
+  form.reset(); updateBlocks();
+  form.querySelectorAll(".missing").forEach(q => q.classList.remove("missing"));
+  document.getElementById("err").classList.add("hidden");
+  document.getElementById("result").classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+document.getElementById("themeBtn").onclick = () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+};
+</script>
+</body>
+</html>
