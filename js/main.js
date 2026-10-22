@@ -32,7 +32,7 @@
   $("#stats").innerHTML = [
     [HALLS.length, "залов"],
     [EXHIBITS.length, "экспонатов"],
-    [TIMELINE.length, "эпох в летописи"],
+    [PHOTOS.length, "фотографий"],
   ].map(([n, l]) => `<div><dt>${n}</dt><dd>${l}</dd></div>`).join("");
 
   // Залы
@@ -150,6 +150,27 @@
     $("#tour-prev").disabled = step === 0;
     $("#tour-next").disabled = step === HALLS.length - 1;
   }
+
+  // Фотогалерея
+  $("#gallery-grid").innerHTML = PHOTOS.map((ph, i) =>
+    `<button class="photo" data-photo="${i}">
+      <img src="${esc(ph.src)}" alt="${esc(ph.title)}" loading="lazy">
+      <span class="photo-caption">${esc(ph.title)}</span>
+    </button>`
+  ).join("");
+  $("#gallery-grid").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-photo]");
+    if (!b) return;
+    const ph = PHOTOS[+b.dataset.photo];
+    $("#modal-content").innerHTML = `
+      <figure class="lightbox">
+        <img src="${esc(ph.src)}" alt="${esc(ph.title)}">
+        <figcaption><h3 id="modal-title">${esc(ph.title)}</h3><p>${esc(ph.text)}</p></figcaption>
+      </figure>`;
+    modal.classList.add("modal-photo");
+    modal.showModal();
+  });
+  modal.addEventListener("close", () => modal.classList.remove("modal-photo"));
 
   // Летопись
   $("#timeline-list").innerHTML = TIMELINE.map((t) =>
